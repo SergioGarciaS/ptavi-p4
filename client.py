@@ -8,18 +8,21 @@ import socket
 import sys
 
 # Constantes. Dirección IP del servidor y contenido a enviar
-SERVER = sys.argv[1]
-PORT = int(sys.argv[2])
-LINE = ' '.join(sys.argv[4:])
-CORTES = LINE.split(' ')
-if sys.argv[3] == 'register':
-    LINE = str('REGISTER sip: ' + LINE)
-# Creamos el socket, lo configuramos y lo atamos a un servidor/puerto
-with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as my_socket:
-    my_socket.connect((SERVER, PORT))
-    print("Enviando:", LINE)
-    my_socket.send(bytes(LINE + ' SIP/2.0\r\n\r\n ', 'utf-8') +  b'\r\n')
-    data = my_socket.recv(1024)
-    print('Recibido -- ', data.decode('utf-8'))
+if len(sys.argv) == 6:
+    SERVER = sys.argv[1]
+    PORT = int(sys.argv[2])
+    USER = sys.argv[4]
+    EXPIRES = sys.argv[5]
+    if sys.argv[3] == 'register':
+        USER = str('REGISTER sip: ' + USER)
+    # Creamos el socket, lo configuramos y lo atamos a un servidor/puerto
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as my_socket:
+        my_socket.connect((SERVER, PORT))
+        print("Enviando:", USER)
+        my_socket.send(bytes(USER + ' SIP/2.0\r\n' + "Expires: " + EXPIRES + '\r\n', 'utf-8') +  b'\r\n')
+        data = my_socket.recv(1024)
+        print('Recibido -- ', data.decode('utf-8'))
 
-print("Socket terminado.")
+    print("Socket terminado.")
+else:
+    sys.exit('Usage: client.py ip puerto register sip_addres expires_value')

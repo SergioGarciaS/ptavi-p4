@@ -23,8 +23,10 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         DATA = LINE.decode('utf-8')
         CORTES = DATA.split(' ')
         if CORTES[0] == 'REGISTER':
-            self.Client_data[CORTES[2]] = self.client_address[0]
-
+            if CORTES[4] != '0\r\n\r\n':
+                self.Client_data[CORTES[2]] = self.client_address[0]
+            else:
+                self.Client_data.pop(CORTES[2])
         print("Datos cliente(IP, puerto): " + str(self.client_address))
         print("El cliente nos manda ", DATA)
         print(self.Client_data)
