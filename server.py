@@ -11,24 +11,23 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
     """
     Echo server class
     """
-
+    Client_data = {}
     def handle(self):
         """
         handle method of the server class
         (all requests will be handled by this method)
         """
         self.wfile.write(b"SIP/2.0 200 OK\r\n\r\n")
-        Client_data = {}
+
         LINE = self.rfile.read()
         DATA = LINE.decode('utf-8')
         CORTES = DATA.split(' ')
         if CORTES[0] == 'REGISTER':
-            Client_data[CORTES[1]] = CORTES[2]
-            Client_data['ip'] = self.client_address[0]
+            self.Client_data[CORTES[2]] = self.client_address[0]
 
         print("Datos cliente(IP, puerto): " + str(self.client_address))
         print("El cliente nos manda ", DATA)
-        print(Client_data)
+        print(self.Client_data)
         print(" =============================")
 if __name__ == "__main__":
     # Listens at localhost ('') port 6001
