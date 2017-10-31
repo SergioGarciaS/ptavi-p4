@@ -18,8 +18,9 @@ if len(sys.argv) == 6:
     # Creamos el socket, lo configuramos y lo atamos a un servidor/puerto
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as my_socket:
         my_socket.connect((SERVER, PORT))
+        Data = USER + ' SIP/2.0\r\n' + 'Expires: ' + EXPIRES + '\r\n\r\n'
         print("Enviando:", USER)
-        my_socket.send(bytes(USER + ' SIP/2.0\r\n' + "Expires: " + EXPIRES + '\r\n', 'utf-8') +  b'\r\n')
+        my_socket.send(bytes(Data, 'utf-8'))
         data = my_socket.recv(1024)
         print('Recibido -- ', data.decode('utf-8'))
 
