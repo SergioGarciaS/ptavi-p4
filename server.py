@@ -14,14 +14,14 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
     Echo server class
     """
     Client_data = {}
-    
+
     def register2json(self):
         """
         Json creator
         """
         with open('registered.json', "w") as outfile:
             json.dump(self.Client_data, outfile, sort_keys=True, indent=4)
-            
+
     def json2registered(self):
         """
         Json file checker
@@ -32,25 +32,18 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                 self.exist_file = True
         except:
             self.exist_file = False
-    
+
     def comprobar_cad(self):
         time_str = time.strftime('%Y-%m-%d %H:%M:%S +%Z',
                           time.gmtime(time.time()))
+        deleted = []
         for cosas in self.Client_data:
-            print(self.Client_data[cosas]['expires'])
-            if self.Client_data[cosas]['expires'] >= time_str:
-                print("PUTO AMO")
-            else:
-                print("MAS AMO TODAVIA")
-            """
-            for movidas in self.Client_data[cosas]:
-            
-                print(movidas)
-                if movidas == 'expires':
-                    print("true")
-                else:
-                    print("que loco")
-            """                
+            # print(cosas + ': ' +self.Client_data[cosas]['expires'])
+            if self.Client_data[cosas]['expires'] <= time_str:
+                deleted.append(cosas)
+        for users in deleted:
+            self.Client_data.pop(users)
+
     def handle(self):
         """
         handle method of the server class
@@ -64,7 +57,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         EXPIRE = CORTES[4][:-4]
         time_expire_str = time.strftime('%Y-%m-%d %H:%M:%S +%Z',
                           time.gmtime(time.time()+int(EXPIRE)))
-        
+
         if CORTES[0] == 'REGISTER':
             if EXPIRE != '0':
                 atributos['address'] = self.client_address[0]
