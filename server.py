@@ -28,12 +28,15 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         """
         try:
             with open("registered.json", "r") as data_file:
-                self.Client_da = json.load(data_file)
+                self.Client_data = json.load(data_file)
                 self.exist_file = True
         except:
             self.exist_file = False
 
-    def comprobar_cad(self):
+    def comprobar_cad_del(self):
+        """
+        Output time and user's delete checker.
+        """
         time_str = time.strftime('%Y-%m-%d %H:%M:%S +%Z',
                           time.gmtime(time.time()))
         deleted = []
@@ -54,10 +57,13 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         LINE = self.rfile.read()
         DATA = LINE.decode('utf-8')
         CORTES = DATA.split(' ')
-        EXPIRE = CORTES[4][:-4]
+        EXPIRE = CORTES[3][:-4]
+        print(EXPIRE)
         time_expire_str = time.strftime('%Y-%m-%d %H:%M:%S +%Z',
                           time.gmtime(time.time()+int(EXPIRE)))
-
+        self.json2registered()
+        if self.exist_file == 'true':
+            print(self.Client_data)
         if CORTES[0] == 'REGISTER':
             if EXPIRE != '0':
                 atributos['address'] = self.client_address[0]
@@ -67,11 +73,10 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                 self.Client_data.pop(CORTES[2])
         print("Datos cliente(IP, puerto): " + str(self.client_address))
         print("El cliente nos manda ", DATA[:-4])
-        self.comprobar_cad()
+        self.comprobar_cad_del()
         self.register2json()
-        self.json2registered()
-        if self.exist_file == 'true':
-            print(self.Client_da)
+
+
 if __name__ == "__main__":
 
     Server_port = int(sys.argv[1])
