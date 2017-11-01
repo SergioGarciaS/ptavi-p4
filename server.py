@@ -26,12 +26,8 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         """
         Json file checker
         """
-        try:
-            with open("registered.json", "r") as data_file:
-                self.Client_data = json.load(data_file)
-                self.exist_file = True
-        except:
-            self.exist_file = False
+        with open("registered.json", "r") as data_file:
+            self.Client_data = json.load(data_file)
 
     def comprobar_cad_del(self):
         """
@@ -41,7 +37,6 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                           time.gmtime(time.time()))
         deleted = []
         for cosas in self.Client_data:
-            # print(cosas + ': ' +self.Client_data[cosas]['expires'])
             if self.Client_data[cosas]['expires'] <= time_str:
                 deleted.append(cosas)
         for users in deleted:
@@ -54,26 +49,30 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         """
         atributos = {} # Value de datos del cliente.
         self.wfile.write(b"SIP/2.0 200 OK\r\n\r\n")
+
+        if not self.Client_data:
+            self.json2registered()
+
         LINE = self.rfile.read()
         DATA = LINE.decode('utf-8')
         CORTES = DATA.split(' ')
-        EXPIRE = CORTES[3][:-4]
-        print(EXPIRE)
         time_expire_str = time.strftime('%Y-%m-%d %H:%M:%S +%Z',
-                          time.gmtime(time.time()+int(EXPIRE)))
-        self.json2registered()
-        if self.exist_file == 'true':
-            print(self.Client_data)
+                          time.gmtime(time.time()+int(CORTES[3][:-4])))
+
+
         if CORTES[0] == 'REGISTER':
-            if EXPIRE != '0':
-                atributos['address'] = self.client_address[0]
+            atributos['address'] = self.client_address[0]
+            if CORTES[3][:-4] != '0':
                 atributos['expires'] = time_expire_str
-                self.Client_data[CORTES[2]] = atributos
             else:
-                self.Client_data.pop(CORTES[2])
+                atributos['expires'] = time.strftime('%Y-%m-%d %H:%M:%S +%Z',
+                                                     time.gmtime(time.time()))
+            self.Client_data[CORTES[1]] = atributos
+            self.comprobar_cad_del()
+
         print("Datos cliente(IP, puerto): " + str(self.client_address))
         print("El cliente nos manda ", DATA[:-4])
-        self.comprobar_cad_del()
+
         self.register2json()
 
 
